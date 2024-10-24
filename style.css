@@ -1,0 +1,15 @@
+input[type="date"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px; /* Increased font size */
+    transition: border-color 0.3s;
+}
+
+input[type="date"]:focus {
+    border-color: #28a745; /* Change border color on focus */
+    outline: none; /* Remove default outline */
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.5); /* Add a subtle shadow */
+}
