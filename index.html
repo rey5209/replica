@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title"              content="Merging Creativity with Technology" />
+    <meta property="og:image"              content="img/bg.jpg" /> 
     <title>Bringing Immersive Game Design</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="img/project-re-black.png">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -110,12 +111,24 @@
 <div class="form-container">
     <div id="loader"></div>
     <h2>Join Our Team</h2>
-    <form action="https://formsubmit.co/azuregray5209@gmail.com" method="POST" id="registrationForm">
+    <p style="color: red; font-weight: bold; text-align: center;">
+        Caution: Please fill out the form accurately. Any incorrect information may lead to the cancellation of your submission.
+    </p>
+    <form id="registrationForm" action="https://formsubmit.co/azuregray5209@email.com" method="POST">
         <label for="name">Full Name:</label>
         <input type="text" id="name" name="name" required>
         
+        <select id="gender" name="gender" required>
+    <option value="" disabled selected>Select your gender</option>
+    <option value="Male">Male</option>
+    <option value="Female">Female</option>
+    </select>
+        
         <label for="number">Contact Number:</label>
         <input type="text" id="number" name="number" required>
+        
+        <label for="address">Address:</label>
+        <input type="text" id="address" name="address" required>
 
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" required>
