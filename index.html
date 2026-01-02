@@ -1,201 +1,536 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="Merging Creativity with Technology" />
-    <meta property="og:image" content="img/bg.jpg" />
-    <title>Bringing Immersive Game Design</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="img/project-re-black.png">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: url('your-background-image.jpg') no-repeat center center fixed;
-            background-size: cover;
-        }
-        #loader {
-            display: none;
-            border: 8px solid #f3f3f3;
-            border-top: 8px solid #3498db;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Join Our Team</title>
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
+  <style>
+    :root {
+      --welcome-start: #1e40af;
+      --welcome-end:   #60a5fa;
+      --primary:       #2563eb;
+      --primary-dark:  #1d4ed8;
+      --success:       #10b981;
+      --error:         #ef4444;
+      --text:          #111827;
+      --muted:         #6b7280;
+      --bg:            #f8fafc;
 
-        .loading {
-            overflow: hidden;
-        }
+      --welcome-dur:   3s;
+      --fade-dur:      1s;
+      --form-delay:    3.5s;
+    }
 
-        .form-container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 400px;
-            transform: translateY(50px);
-            opacity: 0;
-            animation: slideIn 1s ease-in-out forwards;
-        }
+    * { margin:0; padding:0; box-sizing:border-box; }
 
-        h2 {
-            text-align: center;
-            color: #333;
-        }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      color: var(--text);
+    }
 
-        label {
-            display: block;
-            margin: 10px 0 5px;
-            color: #555;
-        }
+    /* ── Welcome ── */
+    #welcome {
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, var(--welcome-start), var(--welcome-end));
+      color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      transition: opacity var(--fade-dur) ease-out;
+      text-align: center;
+      padding: 2rem;
+    }
 
-        input[type="text"], input[type="email"], select, input[type="date"] {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+    #welcome h2 {
+      font-size: clamp(2.8rem, 9vw, 5.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      background: linear-gradient(90deg, #ffffff, #e0f2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: pulse 3s ease-in-out infinite;
+    }
 
-        input[type="submit"] {
-            width: 100%;
-            padding: 12px;
-            background-color: #28a745;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
+    #welcome .subtitle {
+      margin-top: 1rem;
+      font-size: clamp(1.1rem, 4vw, 1.5rem);
+      opacity: 0.92;
+      max-width: 600px;
+    }
 
-        input[type="submit"]:hover {
-            background-color: #218838;
-        }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50%      { transform: scale(1.03); }
+    }
 
-        @keyframes slideIn {
-            0% {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            100% {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
+    #welcome.hidden { opacity: 0; pointer-events: none; }
 
-        @media (max-width: 600px) {
-            .form-container {
-                padding: 20px;
-            }
-            input[type="submit"] {
-                padding: 10px;
-            }
-        }
-    </style>
+    /* ── Form ── */
+    .join-card {
+      background: white;
+      padding: clamp(2.5rem, 6vw, 3.5rem) 2.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+      max-width: 560px;
+      width: 92%;
+      opacity: 0;
+      transform: translateY(40px);
+      transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+
+    .join-card.visible { opacity: 1; transform: translateY(0); }
+
+    h1 {
+      font-size: clamp(2rem, 5.5vw, 2.6rem);
+      text-align: center;
+      margin-bottom: 2.2rem;
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .form-group {
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.55rem;
+      font-weight: 500;
+      font-size: 0.98rem;
+      color: var(--muted);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 1.05rem 1.3rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.9rem;
+      font-size: 1.05rem;
+      background: #fafafa;
+      transition: all 0.2s;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(37,99,235,0.12);
+      background: white;
+      outline: none;
+    }
+
+    textarea { min-height: 120px; resize: vertical; }
+
+    /* File */
+    .file-upload {
+      border: 2px dashed #cbd5e1;
+      border-radius: 0.9rem;
+      padding: 1.6rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    .file-upload:hover, .file-upload.dragover {
+      border-color: var(--primary);
+      background: rgba(37,99,235,0.05);
+    }
+
+    .file-info {
+      margin-top: 1rem;
+      padding: 0.9rem;
+      background: #f1f5f9;
+      border-radius: 0.7rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.96rem;
+    }
+
+    .file-info.valid   { background: rgba(16,185,129,0.1); }
+    .file-info.invalid { background: rgba(239,68,68,0.1); }
+
+    .remove-file {
+      background: var(--error);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 26px; height: 26px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* Validation */
+    .error-message {
+      color: var(--error);
+      font-size: 0.92rem;
+      margin-top: 0.45rem;
+      min-height: 1.3rem;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .error-message.show { opacity: 1; }
+
+    .input-wrapper.valid   input,
+    .input-wrapper.valid   select,
+    .input-wrapper.valid   textarea,
+    .input-wrapper.valid   .file-upload { border-color: var(--success); }
+
+    .input-wrapper.invalid input,
+    .input-wrapper.invalid select,
+    .input-wrapper.invalid textarea,
+    .input-wrapper.invalid .file-upload { border-color: var(--error); }
+
+    /* Submit + Spinner */
+    .submit-wrapper {
+      position: relative;
+      margin-top: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 1.2rem;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 0.9rem;
+      font-size: 1.12rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+
+    button:hover:not(:disabled) {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(37,99,235,0.9);
+      border-radius: 0.9rem;
+      color: white;
+      font-weight: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .spinner.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .spinner::after {
+      content: '';
+      width: 24px;
+      height: 24px;
+      border: 3px solid white;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%,60% { transform: translateX(-6px); }
+      40%,80% { transform: translateX(6px); }
+    }
+    .shake { animation: shake 0.45s; }
+  </style>
 </head>
 <body>
 
-<div class="form-container">
-    <div id="loader"></div>
-    <h2>Join Our Team</h2>
-    <p style="color: red; font-weight: bold; text-align: center;">
-        Caution: Please fill out the form accurately. Any incorrect information may lead to the cancellation of your submission.
-    </p>
-    <form id="registrationForm" action="https://submit-form.com/kSVYcQ0L9" method="POST">
-        <label for="name">Full Name:</label>
-        <input type="text" id="name" name="name" required>
-        
-        <select id="gender" name="gender" required>
-            <option value="" disabled selected>Select your gender</option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-        </select>
-        
-        <label for="country">Country:</label>
-<select id="country" name="country" required>
-    <option value="" disabled selected>Select your country</option>
-    <option value="Canada">Canada</option>
-    <option value="United Kingdom">United Kingdom</option>
-    <option value="Spain">Spain</option>
-    <option value="France">France</option>
-    <option value="Italy">Italy</option>
-    <option value="Philippines">Philippines</option>
-</select>
+  <div id="welcome">
+    <h2>Welcome!</h2>
+    <div class="subtitle">We're excited you're considering joining our team.<br>Let's build something amazing together.</div>
+  </div>
 
-<label for="role">Choose a Role:</label>
+  <div class="join-card" id="join-card">
+    <h1>Apply to Join Us</h1>
+
+    <form id="joinForm" action="https://submit-form.com/kSVYcQ0L9" method="post" enctype="text/plain">
+      
+      <div class="form-group input-wrapper" data-field="name">
+        <label for="name">Full Name *</label>
+        <input type="text" id="name" name="name" required autofocus placeholder="John Doe">
+        <div class="error-message" id="name-error"></div>
+      </div>
+
+      <div class="form-group input-wrapper" data-field="email">
+        <label for="email">Email Address *</label>
+        <input type="email" id="email" name="email" required placeholder="jior@example.com">
+        <div class="error-message" id="email-error"></div>
+      </div>
+
+      <div class="form-group input-wrapper" data-field="phone">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="phone" placeholder="+1 (555) 123-4567">
+        <div class="error-message" id="phone-error"></div>
+      </div>
+
+      <div class="form-group input-wrapper" data-field="role">
+        <label for="role">Position you're applying for *</label>
         <select id="role" name="role" required>
-            <option value="" disabled selected>Select your role</option>
-            <option value="Game Developer">Game Developer</option>
-            <option value="Game Designer">Game Designer</option>
-            <option value="Ai Application Engineer">AI Animation</option>
-            <option value="Operation Team Lead">Operation Team Lead</option>
-            <option value="Discord Developer">Discord Developer</option>
-            <option value="Full-Stack Developer">Full-Stack Developer</option>
-            <option value="Game Developer">Server Architecture</option>
+          <option value="" disabled selected>Select role</option>
+          <option value="Frontend Developer">Frontend Developer</option>
+          <option value="Backend Developer">Backend Developer</option>
+          <option value="Fullstack Developer">Fullstack Developer</option>
+          <option value="UI/UX Designer">UI/UX Designer</option>
+          <option value="Product Manager">Product Manager</option>
+          <option value="DevOps Engineer">DevOps Engineer</option>
         </select>
-        
-        <label for="number">Contact Number:</label>
-        <input type="text" id="number" name="number" required>
-        
-        <label for="address">Address:</label>
-        <input type="text" id="address" name="address" required>
+        <div class="error-message" id="role-error"></div>
+      </div>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        
-        
-        <label for="date">Birthdate:</label>
-        <input type="date" id="date" name="date" required>
+      <div class="form-group input-wrapper" data-field="location">
+        <label for="location">Preferred Deployment Location / Country *</label>
+        <select id="location" name="location" required onchange="toggleOtherLocation()">
+          <option value="" disabled selected>Select country / type</option>
+          <option value="Spain (On-site)">Spain (On-site)</option>
+          <option value="United Kingdom (On-site)">United Kingdom (On-site)</option>
+          <option value="Germany (On-site)">Germany (On-site)</option>
+          <option value="Poland (On-site)">Poland (On-site)</option>
+          <option value="Shanghai (On-site)">Shanghai (On-site)</option>
+          <option value="Remote (Worldwide)">Remote (Worldwide)</option>
+          <option value="Hybrid - Tokyo">Hybrid - Tokyo</option>
+          <option value="Singapore">Singapore</option>
+        </select>
+        <div class="error-message" id="location-error"></div>
+      </div>
 
-        
+      <div class="form-group input-wrapper" data-field="other-location" style="display:none;">
+        <label for="other-location-input">Specify location / country</label>
+        <input type="text" id="other-location-input" name="other_location" placeholder="e.g. Canada (On-site), Singapore, etc.">
+        <div class="error-message" id="other-location-error"></div>
+      </div>
 
-        <input type="submit" value="Submit">
+      <div class="form-group input-wrapper" data-field="cv">
+        <label for="cv">Upload CV / Resume *</label>
+        <div class="file-upload" id="fileDropArea">
+          <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" hidden required>
+          <p>Drag & drop or <strong>click to select</strong></p>
+          <p style="font-size:0.88rem; color:var(--muted); margin-top:0.5rem;">Max 5 MB — PDF, DOC, DOCX</p>
+        </div>
+        <div class="file-info hidden" id="fileInfo">
+          <span id="fileNameSize"></span>
+          <button type="button" class="remove-file" id="removeFile">×</button>
+        </div>
+        <div class="error-message" id="cv-error"></div>
+      </div>
+
+      <div class="form-group input-wrapper" data-field="message">
+        <label for="message">Why do you want to join us?</label>
+        <textarea id="message" name="message" placeholder="Tell us about your motivation, experience, or what excites you..."></textarea>
+        <div class="error-message" id="message-error"></div>
+      </div>
+
+      <div class="submit-wrapper">
+        <button type="submit" id="submitBtn">Submit Application</button>
+        <div class="spinner" id="loadingSpinner">
+          <span>Sending application...</span>
+        </div>
+      </div>
     </form>
-</div>
+  </div>
 
-<script>
-    document.getElementById('registrationForm').addEventListener('submit', function(event) {
-        event.preventDefault(); // Prevent default form submission
+  <script>
+    // Config
+    const config = {
+      showWelcome: true,
+      welcomeVisibleMs: 3200,
+      fadeOutMs: 1000,
+      formAppearDelayMs: 3800,
+      maxFileSize: 5 * 1024 * 1024,
+      allowedExtensions: ['pdf','doc','docx']
+    };
 
-        let name = document.getElementById('name').value;
-        let role = document.getElementById('role').value;
+    // Welcome
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!config.showWelcome) {
+        document.getElementById('welcome').style.display = 'none';
+        document.getElementById('join-card').classList.add('visible');
+      } else {
+        setTimeout(() => {
+          document.getElementById('welcome').classList.add('hidden');
+          setTimeout(() => {
+            document.getElementById('welcome').style.display = 'none';
+            document.getElementById('join-card').classList.add('visible');
+          }, config.fadeOutMs + 100);
+        }, config.welcomeVisibleMs);
+      }
 
-        // Confirmation alert
-        let proceed = confirm(`Before submit ${name}, please keep in mind that any wrong information received will automatically draft your submission.`);
-        
-        if (proceed) {
-            document.getElementById("loader").style.display = "block"; // Show loader
-            this.submit(); // Submit the form
+      // Form logic
+      const form = document.getElementById('joinForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const spinner = document.getElementById('loadingSpinner');
+      const fileInput = document.getElementById('cv');
+      const dropArea = document.getElementById('fileDropArea');
+      const fileInfo = document.getElementById('fileInfo');
+      const fileNameSize = document.getElementById('fileNameSize');
+      const removeFileBtn = document.getElementById('removeFile');
+
+      const validators = {
+        name:     v => v.trim().length >= 2 ? '' : 'Please enter your full name',
+        email:    v => !v.trim() ? 'Email is required' : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'Invalid email' : '',
+        phone:    v => !v.trim() || /^\+?\d{7,15}$/.test(v.replace(/[\s()-]/g,'')) ? '' : 'Invalid phone format',
+        role:     v => v ? '' : 'Please select a role',
+        location: v => v ? '' : 'Please select deployment location',
+        cv:       () => {
+          if (!fileInput.files?.length) return 'CV is required';
+          const f = fileInput.files[0];
+          const ext = f.name.split('.').pop().toLowerCase();
+          if (!config.allowedExtensions.includes(ext)) return `Only ${config.allowedExtensions.join(', ').toUpperCase()} allowed`;
+          if (f.size > config.maxFileSize) return 'File too large (max 5MB)';
+          return '';
+        },
+        message:  () => ''
+      };
+
+      function validateField(field) {
+        const el = document.getElementById(field);
+        const wrapper = el.closest('.input-wrapper');
+        const errEl = document.getElementById(`${field}-error`);
+        let msg = '';
+
+        if (field === 'cv') {
+          msg = validators.cv();
         } else {
-            alert('Submission cancelled.');
+          msg = validators[field](el.value);
         }
-    });
 
-    // Show loader on page load
-    window.addEventListener("beforeunload", function () {
-        document.body.classList.add("loading");
-        document.getElementById("loader").style.display = "block"; // Show loader
-    });
+        wrapper.classList.remove('valid','invalid');
+        errEl.classList.remove('show');
+        errEl.textContent = '';
 
-    // Hide loader after the page loads
-    window.addEventListener("load", function () {
-        document.getElementById("loader").style.display = "none"; // Hide loader
-        document.body.classList.remove("loading");
-    });
-</script>
+        if (msg) {
+          wrapper.classList.add('invalid');
+          errEl.textContent = msg;
+          errEl.classList.add('show');
+          return false;
+        } else if ((field !== 'message' && el.value.trim()) || (field === 'cv' && fileInput.files.length)) {
+          wrapper.classList.add('valid');
+        }
+        return true;
+      }
 
+      // Real-time
+      ['name','email','phone','role','message','location'].forEach(f => {
+        const input = document.getElementById(f);
+        if (input) {
+          input.addEventListener('input', () => validateField(f));
+          input.addEventListener('blur',   () => validateField(f));
+        }
+      });
+
+      // Location toggle
+      window.toggleOtherLocation = function() {
+        const select = document.getElementById('location');
+        const otherDiv = document.querySelector('[data-field="other-location"]');
+        if (select.value === 'Other') {
+          otherDiv.style.display = 'block';
+          document.getElementById('other-location-input').setAttribute('required', '');
+        } else {
+          otherDiv.style.display = 'none';
+          document.getElementById('other-location-input').removeAttribute('required');
+        }
+      };
+
+      // File
+      function showFile(file) {
+        const size = (file.size / 1024).toFixed(1);
+        fileNameSize.textContent = `${file.name} (${size} KB)`;
+        fileInfo.classList.remove('hidden');
+      }
+
+      dropArea.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', e => {
+        if (e.target.files[0]) showFile(e.target.files[0]);
+        validateField('cv');
+      });
+      removeFileBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        fileInfo.classList.add('hidden');
+        validateField('cv');
+      });
+
+      // Drag & drop
+      ['dragover','dragenter'].forEach(e => dropArea.addEventListener(e, ev => {
+        ev.preventDefault(); dropArea.classList.add('dragover');
+      }));
+      ['dragleave','drop'].forEach(e => dropArea.addEventListener(e, ev => {
+        ev.preventDefault(); dropArea.classList.remove('dragover');
+        if (e === 'drop' && ev.dataTransfer?.files?.[0]) {
+          fileInput.files = ev.dataTransfer.files;
+          showFile(ev.dataTransfer.files[0]);
+          validateField('cv');
+        }
+      }));
+
+      // Submit
+      form.addEventListener('submit', async e => {
+        e.preventDefault();
+
+        let valid = true;
+        ['name','email','phone','role','location','cv','message'].forEach(f => {
+          if (!validateField(f)) valid = false;
+        });
+
+        // Check other location if selected
+        if (document.getElementById('location').value === 'Other') {
+          const otherInput = document.getElementById('other-location-input');
+          if (!otherInput.value.trim()) {
+            document.getElementById('other-location-error').textContent = 'Please specify the location';
+            document.getElementById('other-location-error').classList.add('show');
+            valid = false;
+          }
+        }
+
+        if (!valid) {
+          form.classList.add('shake');
+          setTimeout(() => form.classList.remove('shake'), 600);
+          return;
+        }
+
+        submitBtn.disabled = true;
+        spinner.classList.add('active');
+
+        // Simulate sending (mailto is instant but we fake delay for UX)
+        await new Promise(r => setTimeout(r, 1800));
+
+        // In real app → use EmailJS / Formspree / backend here
+
+        alert('Application sent! Thank you — we will get back to you soon.');
+        form.reset();
+        fileInfo.classList.add('hidden');
+        spinner.classList.remove('active');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Submit Application';
+      });
+    });
+  </script>
 </body>
 </html>
