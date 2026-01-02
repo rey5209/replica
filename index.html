@@ -138,7 +138,6 @@
 
     textarea { min-height: 120px; resize: vertical; }
 
-    /* Colored spots in options */
     option[data-spots="high"] { color: var(--success); }
     option[data-spots="medium"] { color: var(--warning); }
     option[data-spots="low"] { color: var(--error); }
@@ -299,7 +298,7 @@
       <div class="form-group input-wrapper" data-field="role">
         <label for="role">Your Position *</label>
         <select id="role" name="role" required>
-          <option value="" disabled selected>Loading roles...</option>
+          <option value="" disabled selected>Select position</option>
         </select>
         <div class="error-message" id="role-error"></div>
       </div>
@@ -329,9 +328,9 @@
       </div>
 
       <div class="form-group input-wrapper" data-field="cv">
-        <label for="cv">Upload CV / Resume *</label>
+        <label for="cv">Upload CV / Resume (optional)</label>
         <div class="file-upload" id="fileDropArea">
-          <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" hidden required>
+          <input type="file" id="cv" name="cv" accept=".pdf,.doc,.docx" hidden>
           <p>Drag & drop or <strong>click to select</strong></p>
           <p style="font-size:0.88rem; color:var(--muted); margin-top:0.5rem;">Max 5 MB — PDF, DOC, DOCX</p>
         </div>
@@ -395,17 +394,13 @@
         option.textContent = `${role} – ${spots > 0 ? spots + '/4 left' : 'Full'}`;
         option.dataset.spots = getSpotsClass(spots);
         option.disabled = spots <= 0;
-        if (role === currentValue && spots > 0) {
-          option.selected = true;
-        }
+        if (role === currentValue && spots > 0) option.selected = true;
         select.appendChild(option);
       });
     }
 
-    // Load roles on start
     updateRoleOptions();
 
-    // === DOM Ready ===
     document.addEventListener('DOMContentLoaded', () => {
       if (!config.showWelcome) {
         document.getElementById('welcome').style.display = 'none';
@@ -435,12 +430,12 @@
         phone:    v => !v.trim() || /^\+?\d{7,15}$/.test(v.replace(/[\s()-]/g,'')) ? '' : 'Invalid phone format',
         role:     v => v ? '' : 'Please select a position',
         location: v => v ? '' : 'Please select deployment location',
-        cv:       () => {
-          if (!fileInput.files?.length) return 'CV is required';
+        cv:       (v) => {
+          if (!fileInput.files?.length) return ''; // optional → no error
           const f = fileInput.files[0];
           const ext = f.name.split('.').pop().toLowerCase();
-          if (!config.allowedExtensions.includes(ext)) return `Only ${config.allowedExtensions.join(', ').toUpperCase()} allowed`;
-          if (f.size > config.maxFileSize) return 'File too large (max 5MB)';
+          if (!config.allowedExtensions.includes(ext)) return `Only PDF, DOC, DOCX allowed`;
+          if (f.size > config.maxFileSize) return 'File too large (max 5 MB)';
           return '';
         },
         message:  () => ''
@@ -450,7 +445,13 @@
         const el = document.getElementById(field);
         const wrapper = el.closest('.input-wrapper');
         const errEl = document.getElementById(`${field}-error`);
-        let msg = field === 'cv' ? validators.cv() : validators[field](el.value);
+        let msg = '';
+
+        if (field === 'cv') {
+          msg = validators.cv();
+        } else {
+          msg = validators[field](el.value);
+        }
 
         wrapper.classList.remove('valid','invalid');
         errEl.classList.remove('show');
@@ -475,6 +476,9 @@
         }
       });
 
+      // CV validation only when file is selected
+      fileInput.addEventListener('change', () => validateField('cv'));
+
       window.toggleOtherLocation = function() {
         const select = document.getElementById('location');
         const otherDiv = document.querySelector('[data-field="other-location"]');
@@ -491,12 +495,12 @@
         const size = (file.size / 1024).toFixed(1);
         fileNameSize.textContent = `${file.name} (${size} KB)`;
         fileInfo.classList.remove('hidden');
+        validateField('cv');
       }
 
       dropArea.addEventListener('click', () => fileInput.click());
       fileInput.addEventListener('change', e => {
         if (e.target.files[0]) showFile(e.target.files[0]);
-        validateField('cv');
       });
 
       removeFileBtn.addEventListener('click', () => {
@@ -514,7 +518,6 @@
         if (e === 'drop' && ev.dataTransfer?.files?.[0]) {
           fileInput.files = ev.dataTransfer.files;
           showFile(ev.dataTransfer.files[0]);
-          validateField('cv');
         }
       }));
 
@@ -522,9 +525,12 @@
         e.preventDefault();
 
         let valid = true;
-        ['name','email','phone','role','location','cv','message'].forEach(f => {
+        ['name','email','phone','role','location','message'].forEach(f => {
           if (!validateField(f)) valid = false;
         });
+
+        // CV is optional, but if uploaded → must be valid
+        if (!validateField('cv')) valid = false;
 
         const locationSelect = document.getElementById('location');
         if (locationSelect.value === 'Other') {
@@ -557,13 +563,14 @@
           });
 
           if (response.ok) {
-            // Decrease spots on success
             if (roleSpots[selectedRole] > 0) {
               roleSpots[selectedRole]--;
               updateRoleOptions(selectedRole);
             }
 
-            alert(`Thank you!\nYour application for ${selectedRole} has been received.\nSpots left: ${roleSpots[selectedRole] || 0}/4`);
+            alert(`Thank you!\nYour application for ${selectedRole} has been received.` +
+                  (fileInput.files.length ? "\nCV attached." : "\n(No CV attached)") +
+                  `\nSpots left: ${roleSpots[selectedRole] || 0}/4`);
 
             form.reset();
             fileInfo.classList.add('hidden');
@@ -571,10 +578,16 @@
             submitBtn.disabled = false;
             submitBtn.textContent = 'Submit Application';
           } else {
-            throw new Error('Submission failed');
+            throw new Error(await response.text() || 'Submission failed');
           }
         } catch (err) {
-          alert('There was a problem sending your application.\nPlease try again.');
+          let msg = "There was a problem sending your application.";
+          if (err.message.includes('file') || err.message.includes('upload')) {
+            msg += "\n→ File upload may not be supported on the free plan";
+          } else if (err.message.includes('limit')) {
+            msg += "\n→ Monthly submission limit may have been reached";
+          }
+          alert(msg + "\nPlease try again or check your Formspree dashboard.");
           spinner.classList.remove('active');
           submitBtn.disabled = false;
           submitBtn.textContent = 'Submit Application';
